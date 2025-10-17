@@ -9,6 +9,7 @@ pipeline{
     stages{
         stage('Checkout'){
             steps{
+                cleanWs()
                 checkout scm
                 echo "Checking out ${env.GIT_COMMIT}"
             }
