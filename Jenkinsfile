@@ -11,7 +11,7 @@ pipeline{
             steps{
                 cleanWs()
                 checkout scm
-                echo "Checking out ${env.GIT_COMMIT}"
+                bat 'echo Checking out'
             }
         }
 
