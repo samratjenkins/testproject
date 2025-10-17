@@ -19,7 +19,6 @@ pipeline{
             steps{
                 bat '''
                 echo "Running simple build step"
-                #Example test : create a sample report file
                 md reports
                 echo "Build output for commit ${GIT_COMMIT}" > reports/build-report.txt
                 echo "Date : $(date)" >> reports/build-report.txt
