@@ -16,7 +16,7 @@ pipeline{
 
         stage('Build / Test ( example )'){
             steps{
-                sh '''
+                bat '''
                 echo "Running simple build step"
                 #Example test : create a sample report file
                 mkdir -p reports
@@ -26,11 +26,41 @@ pipeline{
             }
         }
 
-        stage('Archive Report'){
+        stage('Generate HTML report') {
+
+          steps {
+
+            bat '''
+
+              mkdir -p reports/html
+
+              echo "<html><body><h1>Report</h1><p>Commit ${GIT_COMMIT}</p></body></html>" > reports/html/index.html
+
+            '''
+
+          }
+
+        }
+
+        stage('Archive and publish HTML') {
+
+          steps {
+
+            archiveArtifacts artifacts: 'reports/**'
+
+            publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'reports/html', reportFiles: 'index.html', reportName: 'Simple HTML Report'])
+
+          }
+
+        }
+
+        /*
+        stage('Archive and publish HTML Report'){
             steps{
                 archiveArtifacts artifacts: 'reports/**', onlyIfSuccessful: true
             }
         }
+        */
     }
 
     post{
