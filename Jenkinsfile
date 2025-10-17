@@ -1,80 +1,84 @@
-pipeline{
-    agent any
+pipeline {
 
-    triggers {
-    // run every 7 days
-    cron('H H * * 0')
+  agent any
+
+  // Run weekly
+
+  triggers { cron('H H * * 0') } // weekly
+
+  stages {
+
+    stage('Checkout') {
+
+      steps {
+
+        checkout scm
+
+      }
+
     }
 
-    stages{
-        stage('Checkout'){
-            steps{
-                cleanWs()
-                checkout scm
-                bat 'echo Checking out'
-            }
-        }
+    stage('Build') {
 
-        stage('Build / Test ( example )'){
-            steps{
-                bat '''
-                echo "Running simple build step"
-                md reports
-                echo "Build output for commit ${GIT_COMMIT}" > reports/build-report.txt
-                echo "Date : $(date)" >> reports/build-report.txt
-                '''
-            }
-        }
+      steps {
 
-        stage('Generate HTML report') {
 
-          steps {
+        bat 'echo Building...'
 
-            bat '''
+        bat 'echo Build complete > build-output.txt'
 
-              cd reports
-              md html
-              cd html
-              echo "<html><body><h1>Report</h1><p>Commit ${GIT_COMMIT}</p></body></html>" > reports/html/index.html
+      }
 
-            '''
-
-          }
-
-        }
-
-        stage('Archive and publish HTML') {
-
-          steps {
-
-            archiveArtifacts artifacts: 'reports/**'
-
-            publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'reports/html', reportFiles: 'index.html', reportName: 'Simple HTML Report'])
-
-          }
-
-        }
-
-        /*
-        stage('Archive and publish HTML Report'){
-            steps{
-                archiveArtifacts artifacts: 'reports/**', onlyIfSuccessful: true
-            }
-        }
-        */
     }
 
-    post{
-        success{
-            echo "Pipeline succeeded"
-        }
-        failure{
-            echo "Pipeline failed - check console output"
-        }
+    stage('Test') {
+
+      steps {
+
+        bat 'echo Running tests...'
+
+        // create a tiny test result file to publish (example)
+
+        bat 'echo "<testsuite><testcase classname=\\"sample\\" name=\\"t1\\"/></testsuite>" > test-results.xml'
+
+      }
+
     }
 
+    stage('Archive') {
 
+      steps {
 
+        archiveArtifacts artifacts: 'build-output.txt', allowEmptyArchive: true
 
+        junit 'test-results.xml' // publishes test results
+
+      }
+
+    }
+
+  }
+
+  post {
+
+    always {
+
+      echo "Pipeline finished"
+
+    }
+
+    success {
+
+      echo "Success"
+
+    }
+
+    failure {
+
+      echo "Failure - investigate"
+
+    }
+
+  }
 
 }
