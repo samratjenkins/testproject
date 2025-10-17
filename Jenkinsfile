@@ -34,6 +34,7 @@ pipeline{
 
               cd reports
               md html
+              cd html
               echo "<html><body><h1>Report</h1><p>Commit ${GIT_COMMIT}</p></body></html>" > reports/html/index.html
 
             '''
